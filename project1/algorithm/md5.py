@@ -1,8 +1,11 @@
 # team13:$1$hfT7jp2q$0RPgvB3kOEwELDU03lY/k0:16653:0:99999:7:::(eelxru)
+# team13:$1$4fTgjp6q$cDHwA2gMX6mKVmYQELy4A1:16653:0:99999:7:::  (??????) brute force a -> zzzzzz
+
 import base64
 import hashlib
 import binascii
 import math
+import string
 
 
 class MD5Decreption:
@@ -34,13 +37,18 @@ class MD5Decreption:
         temp = b""
 
         ordering = [11, 4, 10, 5, 3, 9, 15, 2, 8, 14, 1, 7, 13, 0, 6, 12]
+        # print(intermediateSum1000)
         for i in ordering:
             temp += intermediateSum1000[i : i + 1]
 
-        print(temp)
-        # iterate 22 times
-        # password += base64[temp % 64]
-        # temp /= 64
+        # print(int(binascii.hexlify(temp), 16))
+        temp = int(binascii.hexlify(temp), 16)
+        hashedPassword = ""
+        for i in range(22):
+            hashedPassword += base64[temp % 64]
+            temp //= 64
+
+        return hashedPassword
 
     def computeHash(self, password, salt, magic):
         intermediateSum1 = self.calc_intermediateSum(password, salt, magic)
@@ -50,6 +58,12 @@ class MD5Decreption:
         )
 
         intermediateSumBase64 = self.calc_crpytBase64(intermediateSum1000)
+
+        finalHashedPassword = magic + salt + b"$" + intermediateSumBase64.encode()
+
+        return finalHashedPassword
+
+    # print(intermediateSumBase64)
 
     def calc_alternateSum(self, password, salt):
         alternate_sum = hashlib.md5(password + salt + password).hexdigest()
@@ -80,13 +94,25 @@ class MD5Decreption:
 
 
 if __name__ == "__main__":
+    res = []
+    ltrs = string.ascii_lowercase
 
-    mdAlgorithm = MD5Decreption()
-    password = "zhgnnd"
+    res += [
+        "".join([a, b, c, d, e])
+        for a in ltrs
+        for b in ltrs
+        for c in ltrs
+        for d in ltrs
+        for e in ltrs
+    ]  # aaaaa -> zzzzz
     salt = "hfT7jp2q"
     magic = "$1$"
-    # print(mdAlgorithm.calc_alternateSum(password.encode(), salt.encode()))
-    mdAlgorithm.computeHash(password.encode(), salt.encode(), magic.encode())
-
-    # ?ü†çÇG¨Oâ…Àú"U
+    matchingHashPassword = b"$1$hfT7jp2q$0RPgvB3kOEwELDU03lY/k0"
+    mdAlgorithm = MD5Decreption()
+    for x in res:
+        if (
+            mdAlgorithm.computeHash(x.encode(), salt.encode(), magic.encode())
+            == matchingHashPassword
+        ):
+            print(x)
 
